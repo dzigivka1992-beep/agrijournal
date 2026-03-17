@@ -1,632 +1,194 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AgriJournal Заболотне</title>
-  <style>
-    :root {
-      --bg: #f6f7f5;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --green: #166534;
-      --green-2: #15803d;
-      --green-3: #dcfce7;
-      --orange: #f59e0b;
-      --blue: #2563eb;
-      --red: #dc2626;
-      --purple: #7c3aed;
-      --shadow: 0 8px 24px rgba(0,0,0,.06);
-      --radius: 16px;
-      --sidebar: 290px;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-    }
-    .app { display: flex; min-height: 100vh; }
-    .sidebar {
-      width: var(--sidebar);
-      background: linear-gradient(180deg, #0f3d28 0%, #0f4c2d 100%);
-      color: white;
-      padding: 22px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-    }
-    .brand { display:flex; gap:14px; align-items:center; margin-bottom: 28px; }
-    .logo {
-      width: 42px; height: 42px; border-radius: 12px; background:#fff; color:var(--green); display:flex; align-items:center; justify-content:center; font-weight:800;
-    }
-    .brand-title { font-size: 18px; font-weight: 800; }
-    .brand-sub { color: #b7e1c2; font-size: 14px; margin-top: 2px; }
-    .menu-title { color: #b7e1c2; font-size: 13px; margin: 20px 0 12px; text-transform: uppercase; letter-spacing: .06em; }
-    .nav a {
-      display:block; color:#effaf1; text-decoration:none; padding:14px 14px; border-radius:14px; margin-bottom:10px; font-weight:600;
-    }
-    .nav a.active, .nav a:hover { background: rgba(255,255,255,.10); }
-    .content { flex:1; min-width:0; }
-    .topbar {
-      position: sticky; top: 0; z-index: 5; background: rgba(255,255,255,.85); backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border); padding: 18px 22px; display:flex; justify-content:space-between; align-items:center;
-    }
-    .status { padding: 10px 14px; border-radius: 999px; background:#effaf1; border:1px solid #cdeed6; color:var(--green-2); font-weight:700; font-size:14px; }
-    .page { padding: 24px; max-width: 1400px; }
-    .page-title { font-size: 30px; font-weight: 800; margin: 0; }
-    .page-sub { color: var(--muted); margin: 8px 0 0; font-size: 16px; }
-    .card {
-      background: var(--card); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
-    }
-    .filters { padding: 18px; margin-top: 22px; }
-    .filters-grid { display:grid; gap:12px; grid-template-columns: 2fr 1fr 1fr 1fr; }
-    input, select, button {
-      font: inherit;
-      border-radius: 14px; border:1px solid var(--border); background:white; color:var(--text); height:48px; padding: 0 14px;
-    }
-    button { cursor:pointer; font-weight:700; }
-    .btn-secondary { background:#fff; }
-    .btn-primary { background: var(--green-2); color:#fff; border-color: transparent; }
-    .btn-row { display:flex; gap:10px; margin-top: 12px; align-items:center; flex-wrap:wrap; }
-    .badge { display:inline-flex; align-items:center; border-radius:999px; border:1px solid var(--border); padding:8px 12px; background:#fff; font-size:14px; font-weight:700; }
-    .table-card { margin-top: 24px; padding:18px; }
-    table { width:100%; border-collapse: collapse; }
-    th, td { padding: 14px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
-    th { text-align:left; color:#374151; font-size:14px; }
-    td { font-size:15px; }
-    .muted { color: var(--muted); }
-    .right { text-align:right; }
-    .pill { display:inline-flex; padding: 7px 12px; border-radius: 999px; font-size:14px; font-weight:700; border:1px solid #ddd; background:#f8fafc; }
-    .op-ground,.op-herb { background:#fff7ed; color:#b45309; border-color:#fed7aa; }
-    .op-fung { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
-    .op-insect { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
-    .op-feed { background:#ecfdf5; color:#047857; border-color:#bbf7d0; }
-    .op-gram { background:#f5f3ff; color:#6d28d9; border-color:#ddd6fe; }
-    .kpi-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:16px; margin-top:22px; }
-    .kpi { padding: 18px; }
-    .kpi .v { font-size: 30px; font-weight: 800; margin-top: 8px; }
-    .report-grid { display:grid; gap:18px; grid-template-columns: 1fr 1fr; margin-top:24px; }
-    .report-card { padding:18px; }
-    .report-title { font-size:22px; font-weight:800; margin:0 0 10px; }
-    .list-item { display:flex; justify-content:space-between; gap:16px; padding:12px 0; border-bottom:1px solid var(--border); }
-    .list-item:last-child { border-bottom:0; }
-    .hidden { display:none !important; }
-    .login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
-    .login-card { width: 340px; padding: 28px; }
-    .login-title { margin:0 0 14px; font-size: 28px; font-weight: 800; text-align:center; }
-    .field-name { font-weight:700; }
-    .small { font-size: 13px; }
-    .ok { color: var(--green-2); font-weight: 800; }
-    @media (max-width: 1100px) {
-      .filters-grid { grid-template-columns: 1fr 1fr; }
-      .report-grid, .kpi-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 900px) {
-      .app { display:block; }
-      .sidebar { position:relative; width:100%; height:auto; }
-      .page { padding: 16px; }
-      .filters-grid { grid-template-columns: 1fr; }
-      .table-scroll { overflow:auto; }
-      table { min-width: 980px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<title>AgriJournal Заболотне</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f5f6f7;
+  margin: 0;
+}
+
+.hidden { display: none; }
+
+.card {
+  width: 320px;
+  margin: 100px auto;
+  padding: 25px;
+  background: white;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+button {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: #1c7c3c;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+header {
+  background: white;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ddd;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+td, th {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+</style>
 </head>
+
 <body>
-  <div id="login" class="login-wrap">
-    <div class="card login-card">
-      <h1 class="login-title">AgriJournal</h1>
-      <p class="page-sub" style="text-align:center;margin-bottom:18px;">Заболотне</p>
-      <input id="loginInput" placeholder="Логін" />
-      <input id="passwordInput" type="password" placeholder="Пароль" style="margin-top:10px;" />
-      <button id="loginBtn" class="btn-primary" onclick="doLogin()" style="width:100%;margin-top:12px;">Увійти</button>
-    </div>
+
+<!-- 🔐 LOGIN -->
+<div id="login" class="card">
+  <h2>AgriJournal</h2>
+  <p>Заболотне</p>
+
+  <input id="loginInput" placeholder="Логін">
+  <input id="passwordInput" type="password" placeholder="Пароль">
+
+  <button id="loginBtn">Увійти</button>
+</div>
+
+<!-- 🚜 APP -->
+<div id="app" class="hidden">
+
+  <header>
+    <div>AgriJournal Заболотне</div>
+    <button id="logoutBtn">Вийти</button>
+  </header>
+
+  <div style="padding:20px">
+
+    <table>
+      <thead>
+        <tr>
+          <th>Дата</th>
+          <th>Поле</th>
+          <th>Операція</th>
+          <th>Гектари</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
   </div>
 
-  <div id="app" class="app hidden">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="logo">AJ</div>
-        <div>
-          <div class="brand-title">AgriJournal</div>
-          <div class="brand-sub">Заболотне</div>
-        </div>
-      </div>
-      <div class="menu-title">Меню</div>
-      <nav class="nav">
-        <a href="#journal" data-view="journal" class="active">Журнал внесень</a>
-        <a href="#crop" data-view="crop">Звіт по культурах</a>
-        <a href="#operation" data-view="operation">Типи внесень</a>
-        <a href="#tractor" data-view="tractor">Звіт по тракторах</a>
-        <a href="#chemical" data-view="chemical">Використання ТМЦ</a>
-      </nav>
-    </aside>
+</div>
 
-    <div class="content">
-      <div class="topbar">
-        <div></div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <div class="status">● System Active</div>
-          <button id="logoutBtn" class="btn-secondary">Вийти</button>
-        </div>
-      </div>
+<script>
 
-      <main class="page">
-        <section id="view-journal">
-          <h1 class="page-title">Журнал внесень</h1>
-          <p class="page-sub">Повний журнал усіх польових операцій та використаних препаратів.</p>
-
-          <div class="card filters">
-            <div class="filters-grid">
-              <input id="searchInput" placeholder="Пошук по культурі, полю, типу внесення, трактору, препарату..." />
-              <select id="cropFilter"><option value="all">Всі культури</option></select>
-              <select id="operationFilter"><option value="all">Всі типи внесень</option></select>
-              <select id="tractorFilter"><option value="all">Всі трактори</option></select>
-            </div>
-            <div class="btn-row">
-              <select id="closedFilter" style="max-width:240px;">
-                <option value="all">Всі записи</option>
-                <option value="open">Тільки незакриті</option>
-              </select>
-              <button id="resetFilters" class="btn-secondary">Скинути фільтри</button>
-              <span id="recordsBadge" class="badge">0 записів</span>
-            </div>
-          </div>
-
-          <div class="card table-card">
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Дата</th>
-                    <th>Поле</th>
-                    <th>Тип внесення</th>
-                    <th>Трактор / Агрегат</th>
-                    <th>Препарат (ТМЦ)</th>
-                    <th class="right">Гектари</th>
-                    <th class="right">Залишок</th>
-                  </tr>
-                </thead>
-                <tbody id="journalBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="view-crop" class="hidden">
-          <h1 class="page-title">Аналітика по культурах</h1>
-          <p class="page-sub">Розподіл оброблених гектарів по культурах.</p>
-          <div class="kpi-grid">
-            <div class="card kpi"><div class="muted">Загальна площа</div><div id="cropTotalArea" class="v">0 га</div></div>
-            <div class="card kpi"><div class="muted">Кількість культур</div><div id="cropCount" class="v">0</div></div>
-            <div class="card kpi"><div class="muted">Записів у журналі</div><div id="entryCount" class="v">0</div></div>
-          </div>
-          <div class="card report-card" style="margin-top:24px;">
-            <h3 class="report-title">Площа обробки по культурах</h3>
-            <div id="cropList"></div>
-          </div>
-        </section>
-
-        <section id="view-operation" class="hidden">
-          <h1 class="page-title">Аналіз типів внесень</h1>
-          <p class="page-sub">Розподіл гектарів по типах польових операцій.</p>
-          <div class="card report-card" style="margin-top:24px;">
-            <h3 class="report-title">Гектари по типах внесень</h3>
-            <div id="operationList"></div>
-          </div>
-        </section>
-
-        <section id="view-tractor" class="hidden">
-          <h1 class="page-title">Звіт по тракторах</h1>
-          <p class="page-sub">Розподіл виконаних гектарів по тракторах.</p>
-          <div class="card report-card" style="margin-top:24px;">
-            <h3 class="report-title">Гектари по тракторах</h3>
-            <div id="tractorList"></div>
-          </div>
-        </section>
-
-        <section id="view-chemical" class="hidden">
-          <h1 class="page-title">Використання препаратів (ТМЦ)</h1>
-          <p class="page-sub">Облік використання препаратів по всіх операціях.</p>
-          <div class="card report-card" style="margin-top:24px;">
-            <h3 class="report-title">Детальний журнал використання</h3>
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Назва препарату</th>
-                    <th class="right">Загальна кількість</th>
-                    <th class="right">Площа обробки</th>
-                    <th>Культури</th>
-                  </tr>
-                </thead>
-                <tbody id="chemicalBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
-  </div>
-
-  <script>
-    // 🔐 Користувачі (логін + пароль)
+// 👤 Користувачі
 const USERS = [
   { login: 'admin', password: 'agro2026' },
   { login: 'agronom1', password: 'field2026' },
   { login: 'agronom2', password: 'soil2026' }
 ];
-    const SHEET_ID = '1Nb4hQ8Qikb_inkX5o_f6rZ1SR1gFhecKK-yERmNQpKU';
-    const JOURNAL_SHEET = 'Журнал_внесень';
-    const FIELDS_SHEET = 'Поля';
-    const EXCLUDED_TYPE_IDS = new Set([7, 15, 19, 25]);
 
-    const state = {
-      entries: [],
-      fields: [],
-      currentView: 'journal',
-      filters: {
-        search: '', crop: 'all', operation: 'all', tractor: 'all', closed: 'all'
-      }
-    };
+// 📊 ТЕСТ ДАНІ (потім підключимо Google Sheets)
+const DATA = [
+  { date: '16.03.2026', field: 'Жабокрич 47', op: 'Рихлення', ha: 28 },
+  { date: '16.03.2026', field: 'Жабокрич 54', op: 'Рихлення', ha: 10 }
+];
 
-    const el = (id) => document.getElementById(id);
-    const fmt = (n) => Number(n || 0).toLocaleString('uk-UA', { maximumFractionDigits: 2 });
+function el(id) {
+  return document.getElementById(id);
+}
 
-    function getSheetUrl(name) {
-      return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;
-    }
-
-    function parseCsvLine(line) {
-      const result = [];
-      let current = '';
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        const next = line[i + 1];
-        if (char === '"') {
-          if (inQuotes && next === '"') { current += '"'; i++; }
-          else inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          result.push(current.trim()); current = '';
-        } else current += char;
-      }
-      result.push(current.trim());
-      return result.map(v => v.replace(/^"(.*)"$/, '$1').trim());
-    }
-
-    function parseCsv(text) {
-      const lines = [];
-      let current = '';
-      let inQuotes = false;
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const next = text[i + 1];
-        if (char === '"') {
-          if (inQuotes && next === '"') { current += '"'; i++; }
-          else { inQuotes = !inQuotes; current += char; }
-        } else if ((char === '\n' || char === '\r') && !inQuotes) {
-          if (current.trim()) lines.push(current);
-          current = '';
-          if (char === '\r' && next === '\n') i++;
-        } else current += char;
-      }
-      if (current.trim()) lines.push(current);
-      return lines.map(parseCsvLine);
-    }
-
-    function toNumber(v) {
-      if (!v) return 0;
-      const n = Number(String(v).replace(/\s/g, '').replace(',', '.'));
-      return Number.isFinite(n) ? n : 0;
-    }
-
-    function toIsoDate(value) {
-      if (!value) return '';
-      const trimmed = String(value).trim();
-      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-      if (/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(trimmed)) {
-        const [dd, mm, yyyy] = trimmed.split('.');
-        return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
-      }
-      const parsed = new Date(trimmed);
-      if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().slice(0,10);
-      return '';
-    }
-
-    function formatDate(iso) {
-      if (!iso) return '—';
-      const [y, m, d] = iso.split('-');
-      return `${d}.${m}.${y}`;
-    }
-
-    function opClass(type) {
-      if (type.includes('Гербіцид') || type.includes('Ґрунтовий')) return 'op-ground';
-      if (type.includes('Фунгіцид')) return 'op-fung';
-      if (type.includes('Інсектицид')) return 'op-insect';
-      if (type.includes('Підживлення') || type.includes('макродобрив')) return 'op-feed';
-      if (type.toLowerCase().includes('грамініцид')) return 'op-gram';
-      return '';
-    }
-
-    async function loadSheet(name) {
-      const res = await fetch(getSheetUrl(name));
-      if (!res.ok) throw new Error('Не вдалося завантажити таблицю: ' + name);
-      return parseCsv(await res.text());
-    }
-
-    async function loadData() {
-      const [journalRows, fieldRows] = await Promise.all([loadSheet(JOURNAL_SHEET), loadSheet(FIELDS_SHEET)]);
-
-      const journalHeaders = journalRows[0].map(h => h.trim());
-      const rows = journalRows.slice(1).filter(row => row.some(cell => cell.trim() !== '')).reverse();
-      const fieldsHeaders = fieldRows[0].map(h => h.trim());
-      const fieldsData = fieldRows.slice(1).filter(row => row.some(cell => cell.trim() !== ''));
-
-      const idx = (headers, name) => headers.findIndex(h => h === name);
-
-      const journalIdx = {
-        id: idx(journalHeaders, 'ID'),
-        date: idx(journalHeaders, 'Дата'),
-        field: idx(journalHeaders, 'Поле'),
-        crop: idx(journalHeaders, 'Культура'),
-        chemical: idx(journalHeaders, 'Препарат'),
-        operationType: idx(journalHeaders, 'Тип обробки'),
-        typeId: idx(journalHeaders, 'id_type'),
-        reportArea: idx(journalHeaders, 'Гектари для звіту'),
-        dose: idx(journalHeaders, 'Норма'),
-        doseUnit: idx(journalHeaders, 'Од. норми'),
-        treatedArea: idx(journalHeaders, 'Площа обробки га'),
-        totalProduct: idx(journalHeaders, 'Кількість препарату'),
-        tractor: idx(journalHeaders, 'Трактор'),
-        implement: idx(journalHeaders, 'Агрегат'),
-        comment: idx(journalHeaders, 'Коментар'),
-        workId: idx(journalHeaders, 'ID обробки'),
-      };
-
-      const fieldIdx = {
-        field: idx(fieldsHeaders, 'Поле'),
-        area: idx(fieldsHeaders, 'Площа_га'),
-        crop: idx(fieldsHeaders, 'Культура'),
-      };
-
-      state.fields = fieldsData.map(r => ({
-        field: r[fieldIdx.field] || '',
-        area: toNumber(r[fieldIdx.area]),
-        crop: r[fieldIdx.crop] || ''
-      }));
-
-      const fieldAreaMap = new Map(state.fields.map(f => [f.field, f.area]));
-
-      state.entries = rows.map((r, i) => ({
-        id: toNumber(r[journalIdx.id]) || i + 1,
-        date: toIsoDate(r[journalIdx.date]),
-        field: r[journalIdx.field] || '',
-        crop: r[journalIdx.crop] || '',
-        chemical: r[journalIdx.chemical] || '',
-        operationType: r[journalIdx.operationType] || '',
-        typeId: toNumber(r[journalIdx.typeId]),
-        area: toNumber(r[journalIdx.reportArea]),
-        treatedArea: toNumber(r[journalIdx.treatedArea]),
-        dose: toNumber(r[journalIdx.dose]),
-        doseUnit: r[journalIdx.doseUnit] || '',
-        totalProduct: toNumber(r[journalIdx.totalProduct]),
-        tractor: r[journalIdx.tractor] || '—',
-        operator: r[journalIdx.implement] || '—',
-        notes: [r[journalIdx.comment] || '', r[journalIdx.workId] ? `ID обробки: ${r[journalIdx.workId]}` : ''].filter(Boolean).join(' | '),
-        fieldArea: fieldAreaMap.get(r[journalIdx.field] || '') || 0,
-      }));
-
-      const groupedDone = new Map();
-      state.entries.forEach(entry => {
-        if (EXCLUDED_TYPE_IDS.has(entry.typeId)) return;
-        const key = `${entry.field}__${entry.operationType}`;
-        groupedDone.set(key, (groupedDone.get(key) || 0) + (entry.area || 0));
-      });
-
-      state.entries = state.entries.map(entry => {
-        const key = `${entry.field}__${entry.operationType}`;
-        const doneArea = EXCLUDED_TYPE_IDS.has(entry.typeId) ? 0 : (groupedDone.get(key) || 0);
-        const remainingArea = Math.max((entry.fieldArea || 0) - doneArea, 0);
-        return {
-          ...entry,
-          doneArea,
-          remainingArea,
-          isClosed: !EXCLUDED_TYPE_IDS.has(entry.typeId) && entry.fieldArea > 0 && remainingArea <= 0,
-        };
-      });
-
-      renderAll();
-    }
-
-    function getFilteredEntries() {
-      const q = state.filters.search.trim().toLowerCase();
-      return state.entries.filter(entry => {
-        const matchesSearch = !q || [entry.crop, entry.field, entry.operationType, entry.tractor, entry.chemical].join(' ').toLowerCase().includes(q);
-        const matchesCrop = state.filters.crop === 'all' || entry.crop === state.filters.crop;
-        const matchesOperation = state.filters.operation === 'all' || entry.operationType === state.filters.operation;
-        const matchesTractor = state.filters.tractor === 'all' || entry.tractor === state.filters.tractor;
-        const matchesClosed = state.filters.closed === 'all' || (state.filters.closed === 'open' && !entry.isClosed && !EXCLUDED_TYPE_IDS.has(entry.typeId));
-        return matchesSearch && matchesCrop && matchesOperation && matchesTractor && matchesClosed;
-      });
-    }
-
-    function renderJournal() {
-      const entries = getFilteredEntries();
-      el('recordsBadge').textContent = `${entries.length} записів`;
-      const body = el('journalBody');
-      body.innerHTML = entries.map(entry => `
-        <tr>
-          <td>${formatDate(entry.date)}</td>
-          <td><div class="field-name">${entry.field || '—'}</div><div class="muted">${entry.crop || '—'}</div></td>
-          <td><span class="pill ${opClass(entry.operationType)}">${entry.operationType || '—'}</span></td>
-          <td><div class="field-name">${entry.tractor || '—'}</div><div class="muted">${entry.operator || '—'}</div></td>
-          <td>
-            <div class="field-name" style="color:var(--green-2)">${entry.chemical || '—'}</div>
-            ${entry.chemical ? `<div class="muted small">${entry.dose || 0} ${entry.doseUnit || ''} (Всього: ${fmt(entry.totalProduct)}${(entry.doseUnit || '').split('/')[0] || ''})</div>` : ''}
-          </td>
-          <td class="right"><b>${fmt(entry.area)} га</b></td>
-          <td class="right">${EXCLUDED_TYPE_IDS.has(entry.typeId) ? '—' : entry.isClosed ? '<span class="ok">✓</span>' : `<b>${fmt(entry.remainingArea)} га</b>`}</td>
-        </tr>
-      `).join('') || `<tr><td colspan="7" class="muted" style="text-align:center;padding:28px;">Немає записів за вибраними фільтрами.</td></tr>`;
-    }
-
-    function aggregateBy(key, areaField = 'area', filterFn = null) {
-      const map = new Map();
-      state.entries.filter(e => filterFn ? filterFn(e) : true).forEach(entry => {
-        const label = entry[key] || '—';
-        if (!map.has(label)) map.set(label, { label, totalArea: 0, count: 0, crops: new Set() });
-        const item = map.get(label);
-        item.totalArea += Number(entry[areaField] || 0);
-        item.count += 1;
-        if (entry.crop) item.crops.add(entry.crop);
-      });
-      return [...map.values()].map(x => ({ ...x, crops: [...x.crops] })).sort((a,b) => b.totalArea - a.totalArea);
-    }
-
-    function renderSimpleList(targetId, list, suffix = 'га') {
-      el(targetId).innerHTML = list.map(item => `
-        <div class="list-item">
-          <div>
-            <div class="field-name">${item.label}</div>
-            ${item.crops?.length ? `<div class="muted small">${item.crops.join(', ')}</div>` : ''}
-          </div>
-          <div><span class="badge">${fmt(item.totalArea)} ${suffix}</span></div>
-        </div>
-      `).join('');
-    }
-
-    function renderCropReport() {
-      const list = aggregateBy('crop');
-      el('cropTotalArea').textContent = `${fmt(list.reduce((s, x) => s + x.totalArea, 0))} га`;
-      el('cropCount').textContent = String(list.length);
-      el('entryCount').textContent = String(state.entries.length);
-      renderSimpleList('cropList', list);
-    }
-
-    function renderOperationReport() {
-      const list = aggregateBy('operationType');
-      renderSimpleList('operationList', list);
-    }
-
-    function renderTractorReport() {
-      const list = aggregateBy('tractor', 'area', e => e.tractor && e.tractor !== '—');
-      renderSimpleList('tractorList', list);
-    }
-
-    function renderChemicalReport() {
-      const map = new Map();
-      state.entries.forEach(entry => {
-        if (!entry.chemical) return;
-        if (!map.has(entry.chemical)) {
-          map.set(entry.chemical, {
-            chemical: entry.chemical,
-            totalProduct: 0,
-            unit: (entry.doseUnit || '').split('/')[0] || '',
-            totalArea: 0,
-            crops: new Set(),
-          });
-        }
-        const item = map.get(entry.chemical);
-        item.totalProduct += Number(entry.totalProduct || 0);
-        item.totalArea += Number(entry.treatedArea || 0);
-        if (entry.crop) item.crops.add(entry.crop);
-      });
-      const list = [...map.values()].map(x => ({ ...x, crops: [...x.crops] })).sort((a,b) => b.totalArea - a.totalArea);
-      el('chemicalBody').innerHTML = list.map(item => `
-        <tr>
-          <td class="field-name">${item.chemical}</td>
-          <td class="right" style="color:var(--green-2);font-weight:800;">${fmt(item.totalProduct)} ${item.unit}</td>
-          <td class="right">${fmt(item.totalArea)} га</td>
-          <td>${item.crops.map(c => `<span class="badge" style="margin-right:6px;margin-bottom:6px;">${c}</span>`).join('')}</td>
-        </tr>
-      `).join('') || `<tr><td colspan="4" class="muted" style="text-align:center;padding:28px;">Немає даних.</td></tr>`;
-    }
-
-    function renderAll() {
-      renderFilters();
-      renderJournal();
-      renderCropReport();
-      renderOperationReport();
-      renderTractorReport();
-      renderChemicalReport();
-    }
-
-    function renderFilters() {
-      const fillSelect = (id, values, current, first) => {
-        const select = el(id);
-        select.innerHTML = `<option value="all">${first}</option>` + values.map(v => `<option ${v===current?'selected':''} value="${v}">${v}</option>`).join('');
-      };
-      fillSelect('cropFilter', [...new Set(state.entries.map(x => x.crop).filter(Boolean))].sort(), state.filters.crop, 'Всі культури');
-      fillSelect('operationFilter', [...new Set(state.entries.map(x => x.operationType).filter(Boolean))].sort(), state.filters.operation, 'Всі типи внесень');
-      fillSelect('tractorFilter', [...new Set(state.entries.map(x => x.tractor).filter(Boolean))].sort(), state.filters.tractor, 'Всі трактори');
-      el('closedFilter').value = state.filters.closed;
-      el('searchInput').value = state.filters.search;
-    }
-
-    function switchView(view) {
-      state.currentView = view;
-      document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('active', a.dataset.view === view));
-      ['journal','crop','operation','tractor','chemical'].forEach(v => {
-        el(`view-${v}`).classList.toggle('hidden', v !== view);
-      });
-    }
-
-    function bindEvents() {
-      document.querySelectorAll('.nav a').forEach(a => a.addEventListener('click', (e) => {
-        e.preventDefault(); switchView(a.dataset.view);
-      }));
-      el('searchInput').addEventListener('input', e => { state.filters.search = e.target.value; renderJournal(); });
-      el('cropFilter').addEventListener('change', e => { state.filters.crop = e.target.value; renderJournal(); });
-      el('operationFilter').addEventListener('change', e => { state.filters.operation = e.target.value; renderJournal(); });
-      el('tractorFilter').addEventListener('change', e => { state.filters.tractor = e.target.value; renderJournal(); });
-      el('closedFilter').addEventListener('change', e => { state.filters.closed = e.target.value; renderJournal(); });
-      el('resetFilters').addEventListener('click', () => {
-        state.filters = { search:'', crop:'all', operation:'all', tractor:'all', closed:'all' };
-        renderAll();
-      });
-      el('loginBtn').addEventListener('click', doLogin);
-      el('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-      el('loginBtn').addEventListener('click', doLogin);
-        localStorage.removeItem('agrijournal_auth');
-        localStorage.removeItem('agrijournal_user');
-        location.reload();
-      });
-    }
-
-    function doLogin() {
+// 🔐 ЛОГІН
+function doLogin() {
   const login = el('loginInput').value.trim();
   const password = el('passwordInput').value;
 
   const user = USERS.find(u => u.login === login && u.password === password);
 
   if (user) {
-    localStorage.setItem('agrijournal_auth', 'true');
+    localStorage.setItem('auth', 'true');
     el('login').classList.add('hidden');
     el('app').classList.remove('hidden');
+    renderTable();
   } else {
     alert('Невірний логін або пароль');
   }
 }
 
-    async function init() {
-      bindEvents();
-      const authorized = localStorage.getItem('agrijournal_auth') === 'true';
-      if (authorized) {
-        el('login').classList.add('hidden');
-        el('app').classList.remove('hidden');
-      }
-      await loadData();
-      switchView('journal');
-    }
+// 🚪 ЛОГАУТ
+function logout() {
+  localStorage.removeItem('auth');
+  location.reload();
+}
 
-    init().catch(err => {
-      console.error(err);
-      alert('Помилка завантаження даних. Перевір Google Sheets і назви аркушів.');
-    });
-  </script>
+// 📊 РЕНДЕР ТАБЛИЦІ
+function renderTable() {
+  const tbody = el('tableBody');
+  tbody.innerHTML = '';
+
+  DATA.forEach(row => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${row.date}</td>
+        <td>${row.field}</td>
+        <td>${row.op}</td>
+        <td>${row.ha}</td>
+      </tr>
+    `;
+  });
+}
+
+// 🔗 ПОДІЇ
+function bindEvents() {
+  el('loginBtn').addEventListener('click', doLogin);
+
+  el('passwordInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  el('logoutBtn').addEventListener('click', logout);
+}
+
+// 🚀 СТАРТ
+function init() {
+  const auth = localStorage.getItem('auth') === 'true';
+
+  if (auth) {
+    el('login').classList.add('hidden');
+    el('app').classList.remove('hidden');
+    renderTable();
+  }
+
+  bindEvents();
+}
+
+init();
+
+</script>
+
 </body>
 </html>
