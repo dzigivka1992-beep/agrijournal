@@ -122,7 +122,7 @@
       <p class="page-sub" style="text-align:center;margin-bottom:18px;">Заболотне</p>
       <input id="loginInput" placeholder="Логін" />
       <input id="passwordInput" type="password" placeholder="Пароль" style="margin-top:10px;" />
-      <button id="loginBtn" class="btn-primary" style="width:100%;margin-top:12px;">Увійти</button>
+      <button id="loginBtn" class="btn-primary" onclick="doLogin()" style="width:100%;margin-top:12px;">Увійти</button>
     </div>
   </div>
 
@@ -590,7 +590,7 @@ const USERS = [
       });
       el('loginBtn').addEventListener('click', doLogin);
       el('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-      el('logoutBtn').addEventListener('click', () => {
+      el('loginBtn').addEventListener('click', doLogin);
         localStorage.removeItem('agrijournal_auth');
         localStorage.removeItem('agrijournal_user');
         location.reload();
@@ -598,23 +598,19 @@ const USERS = [
     }
 
     function doLogin() {
-      const login = el('loginInput').value.trim();
-      const password = el('passwordInput').value;
+  const login = el('loginInput').value.trim();
+  const password = el('passwordInput').value;
 
-      const user = USERS.find(u => u.login === login && u.password === password);
+  const user = USERS.find(u => u.login === login && u.password === password);
 
-      if (user) {
-        localStorage.setItem('agrijournal_auth', 'true');
-        localStorage.setItem('agrijournal_user', login);
-        el('login').classList.add('hidden');
-        el('app').classList.remove('hidden');
-      } else {
-        alert('Невірний логін або пароль');
-      }
-    } else {
-        alert('Невірний пароль');
-      }
-    }
+  if (user) {
+    localStorage.setItem('agrijournal_auth', 'true');
+    el('login').classList.add('hidden');
+    el('app').classList.remove('hidden');
+  } else {
+    alert('Невірний логін або пароль');
+  }
+}
 
     async function init() {
       bindEvents();
