@@ -452,25 +452,51 @@
       }));
 
       const groupedDone = new Map();
+const countedWorkIds = new Set();
 
-      state.entries.forEach(entry => {
-        if (EXCLUDED_TYPE_IDS.has(entry.typeId)) return;
-        const key = `${entry.field}__${entry.operationType}`;
-        groupedDone.set(key, (groupedDone.get(key) || 0) + (entry.area || 0));
-      });
+state.entries.forEach(entry => {
+  if (EXCLUDED_TYPE_IDS.has(entry.typeId)) return;
 
-      state.entries = state.entries.map(entry => {
-        const key = `${entry.field}__${entry.operationType}`;
-        const doneArea = EXCLUDED_TYPE_IDS.has(entry.typeId) ? 0 : (groupedDone.get(key) || 0);
-        const remainingArea = Math.max((entry.fieldArea || 0) - doneArea, 0);
+  const fieldKey = String(entry.field || "").trim();
+  const opKey = String(entry.operationType || "").trim();
+  const workId = String(entry.notes || "").match(/ID обробки:\s*([^\|]+)/)?.[1]?.trim() || `no_work_${entry.id}`;
 
-        return {
-          ...entry,
-          doneArea,
-          remainingArea,
-          isClosed: !EXCLUDED_TYPE_IDS.has(entry.typeId) && entry.fieldArea > 0 && remainingArea <= 0
-        };
-      });
+  const groupKey = `${fieldKey}__${opKey}`;
+  const uniqueWorkKey = `${fieldKey}__${opKey}__${workId}`;
+
+  if (countedWorkIds.has(uniqueWorkKey)) return;
+
+  let areaToAdd = 0;
+
+  if (Number(entry.area || 0) > 0) {
+    areaToAdd = Number(entry.area || 0);
+  } else if (Number(entry.treatedArea || 0) > 0) {
+    areaToAdd = Number(entry.treatedArea || 0);
+  }
+
+  groupedDone.set(groupKey, (groupedDone.get(groupKey) || 0) + areaToAdd);
+  countedWorkIds.add(uniqueWorkKey);
+});
+
+state.entries = state.entries.map(entry => {
+  const fieldKey = String(entry.field || "").trim();
+  const opKey = String(entry.operationType || "").trim();
+  const key = `${fieldKey}__${opKey}`;
+
+  const doneArea = EXCLUDED_TYPE_IDS.has(entry.typeId)
+    ? 0
+    : (groupedDone.get(key) || 0);
+
+  const fieldArea = Number(entry.fieldArea || 0);
+  const remainingArea = Math.max(fieldArea - doneArea, 0);
+
+  return {
+    ...entry,
+    doneArea,
+    remainingArea,
+    isClosed: !EXCLUDED_TYPE_IDS.has(entry.typeId) && fieldArea > 0 && remainingArea <= 0.01
+  };
+});
 
       renderAll();
     }
